@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple QR Code Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        /* General Button Styles */
+        button {
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-bottom: 10px;
+        }
+
+        /* Generate Button */
+        .generate-btn {
+            background-color: #007bff;
+        }
+        .generate-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Download Button (Hidden by default) */
+        #download-btn {
+            background-color: #28a745;
+            display: none; 
+            margin-top: 15px;
+        }
+        #download-btn:hover {
+            background-color: #218838;
+        }
+
+        #qrcode {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>QR Generator</h2>
+        <input type="text" id="text-input" placeholder="Enter URL or Text" />
+        
+        <button class="generate-btn" onclick="generateQR()">Generate QR Code</button>
+        
+        <div id="qrcode"></div>
+        
+        <button id="download-btn" onclick="downloadQR()">Download QR Code</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        function generateQR() {
+            var text = document.getElementById("text-input").value;
+            var container = document.getElementById("qrcode");
+            var downloadBtn = document.getElementById("download-btn");
+
+            // 1. Clear previous QR code
+            container.innerHTML = "";
+            downloadBtn.style.display = "none";
+
+            // 2. Validate input
+            if (text.trim() === "") {
+                alert("Please enter text or a URL");
+                return;
+            }
+
+            // 3. Generate new QR code
+            new QRCode(container, {
+                text: text,
+                width: 128,
+                height: 128,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            // 4. Show download button
+            setTimeout(function() {
+                downloadBtn.style.display = "block";
+            }, 300);
+        }
+
+        function downloadQR() {
+            var container = document.getElementById("qrcode");
+            
+            // FIX: Look for the CANVAS tag first, as that is what the library draws on.
+            var canvas = container.querySelector("canvas");
+            var img = container.querySelector("img");
+            var url = null;
+
+            if (canvas) {
+                // Convert the canvas content to a PNG data URL
+                url = canvas.toDataURL("image/png");
+            } else if (img && img.src) {
+                // Fallback: If no canvas, try to get the image source
+                url = img.src;
+            }
+
+            if (url) {
+                var link = document.createElement("a");
+                link.href = url;
+                link.download = "qrcode.png";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert("Error: Could not find QR code to download.");
+            }
+        }
+    </script>
+</body>
+</html>
